@@ -53,15 +53,28 @@ export default function InvoicePage() {
   const calculateItemTotal = (quantity: number, unitPrice: number) =>
     quantity * unitPrice;
 
-  const subtotal = (values: any[]) =>
+interface Item {
+    description: string;
+    quantity: number;
+    unitPrice: number;
+}
+
+interface InvoiceData {
+    name: string;
+    address: string;
+    items: Item[];
+    total?: number;
+}
+
+const subtotal = (values: Item[]): number =>
     values.reduce(
-      (acc, item) => acc + calculateItemTotal(item.quantity, item.unitPrice),
-      0
+        (acc, item) => acc + calculateItemTotal(item.quantity, item.unitPrice),
+        0
     );
 
-  const generatePDF = async (name) => {
-    console.log(name, "name");
-    const input = document.getElementById("invoice-form");
+
+const generatePDF = async (name:string) => {
+    const input = document.getElementById("invoice-form") as HTMLElement;
     const canvas = await html2canvas(input);
     const imgData = canvas.toDataURL("image/png");
 
@@ -71,7 +84,7 @@ export default function InvoicePage() {
 
     pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
     pdf.save(`${name}-invoice.pdf`);
-  };
+};
 
   const invoicedContainer = (rows): ReactNode => {
     console.log(rows, "rows");
@@ -119,7 +132,7 @@ export default function InvoicePage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.items.map((row, index) => (
+                {rows.items.map((row: Item, index:number) => (
                   <TableRow key={index}>
                     <TableCell>{row.description}</TableCell>
                     <TableCell align="center">{row.quantity}</TableCell>
@@ -343,15 +356,6 @@ export default function InvoicePage() {
 
                 {/* Buttons */}
                 <Grid container spacing={2} justifyContent="center">
-                  <Grid item>
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      onClick={generatePDF}
-                    >
-                      Generate PDF
-                    </Button>
-                  </Grid>
                   <Grid item>
                     <Button type="submit" variant="contained" color="primary">
                       Submit Invoice
